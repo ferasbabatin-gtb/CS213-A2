@@ -1,0 +1,23 @@
+;_____________________________________
+;vole machine program 2
+;purpose:
+;load four numbers(3,2,14,3) the first with index 0 and the fourth with index 3
+;print the index(3) of the first number matching the first number(3) where the indices are 0,1,2,3
+; if there isn't it will print 0
+;_____________________________________
+2003 ; load the first number
+2202 ; load the second number
+230E ; load the third number
+2403 ; load the fourth number
+2501 ; load 1 to reg 5
+2C01 ; load 1 to reg c for counting
+B218 ; jump to printing if equal
+5CC5 ; increase the counter
+B318 ; jump to printing if equal
+5CC5 ; increase the counter
+B418 ; jump to printing if equal
+2C00 ; make the counter 0 as match wasn't found
+
+;halting and printing
+3CFF ; printing what is in the counter
+C000 ;halt

@@ -1,0 +1,103 @@
+all of the classes: byteMemory, memory, cpuRegisters, cpu, vole_machine, menu
+
+class byteMemory: 
+    private attributes:
+        int data //binary integer like 0b11010101
+    public methods:
+        getData() : int // returns the value
+        setData(int value) : void // sets the value
+        toFloat() : float // converrts the byte value to a float
+    role:
+        it is used to represent a single byte of memory with methods for easier access and conversion to float
+    relation:
+        it is used in the memory class(composition) and cpuRegisters class(composition)
+
+class memory:
+    private attributes:
+        byteMemory data[16 * 16] // the 256 bytes of memory
+    public methods:
+        getAddress(int address) : int // reads a cell
+        setAddress(int value, int address) : void // writes a cell
+    role:
+        it is used to represent the main program memory with 256 bytes of memory
+    relation:
+        it contains 256 byteMemory objects(composition)
+        it is used in the cpu class(composition)
+
+class cpuRegisters:
+    private attributes:
+        byteMemory registers[16] // registers 0 to F
+    public methods:
+        getAddress(int address) : int // reads a register
+        setAddress(int value, int address) : void // writes a register
+    role:
+        it is used to represent the cpu main registers with 16 bytes of memory
+    relation:
+        it contains 16 byteMemory objects(composition)
+        it is used in the cpu class(composition)
+
+class cpu:
+    private attributes:
+        memory mem // main memory
+        cpuRegisters reg // the 16 registers
+        int ir //hex integer like 0x2104
+        int pc // the address of the next instruction
+    public methods:
+        fetch() : void // fetches the instruction from memory into ir
+        DecodeExecute() : int // decodes the instruction in ir and executes it, returns halting, errors, if there is a screen output etc
+        add(int r, int s, int t) : void // opcode 5
+        addFloat(int r, int s, int t) : void // opcode 6
+        move(int r, int s) : void // opcode 4
+        load(int r, int xy) : void // opcode 1
+        loadValue(int r, int value) : void // opcode 2
+        store(int r, int xy) : void // opcode 3
+        op_or(int r, int s, int t) : void // opcode 7
+        op_and(int r, int s, int t) : void // opcode 8
+        op_xor(int r, int s, int t) : void // opcode 9
+        rotate(int r, int x) : void // opcode A
+        jump(int r, int xy) : void // opcode B
+        halt() : void // opcode C
+        getMemory() : memory& // access the memory
+        getRegisters() : cpuRegisters& // access the registers
+        getIR() : int // reads ir
+        getPC() : int // reads pc
+        setPc(int value) : void // sets pc
+        setIr(int value) : void // sets ir
+    role:
+        it is used to represent the cpu itself with its 3 main parts: fetch, decode and execute and the all the operations that can be done by the cpu
+    relation:
+        it contains a memory (composition) and a cpuRegisters (composition)
+        it is used in the vole_machine class(composition)
+
+class vole_machine:
+    protected attributes:
+        cpu theCpu // the cpu
+        bool main_running // true if the main machine is running
+        bool loaded_program_processing // true if a loaded program is running
+        string screen // the screen output
+    public methods:
+        validate(string instruction) : int // validates a single program line
+        load(string filename, int startAddress) : int //validate then load
+        doOneLine() : void //no printing, does instruction and edits program processing if halted and the screen
+        overwriteMemory(bool mode, int address, int value) : void //overwrites memory at address with value
+        doAll() : void //do all instructions in memory
+    role:
+        it is used to represent the vole machine with a cpu, screen and its running states and methods to run the machine and load programs
+    relation:
+        it contains a cpu(composition)
+        it is inherited by the menu class(inheritance)
+
+class menu(publicly inherited from vole_machine): 
+    public methods:
+        run() : void // main menu loop
+        printScreen() : void // shows the screen
+        printMem() : void // shows the memory
+        printReg() : void // shows the registers
+        exit() : void // quits the program
+    role:
+        it is used to represent the cli menu
+    relation:
+        it inherits from the vole_machine class(inheritance)
+        it is used in the main function to run the cli menu
+
+
