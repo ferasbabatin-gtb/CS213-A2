@@ -1,0 +1,148 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+
+class ByteMemory {
+    - data: uint8_t
+    + getData(): uint8_t
+    + setData(value: uint8_t): void
+    + toFloat(): float
+}
+
+class Memory {
+    - cells: ByteMemory[256]
+    + read(address: int): uint8_t
+    + write(address: int, value: uint8_t): void
+    + getCell(address: int): ByteMemory&
+}
+
+class RegisterFile {
+    - registers: ByteMemory[16]
+    + read(regIndex: int): uint8_t
+    + write(regIndex: int, value: uint8_t): void
+    + getRegister(regIndex: int): ByteMemory&
+}
+
+abstract class Instruction {
+    + {abstract} decode(rawInstruction: uint16_t): void
+    + {abstract} execute(cpu: CPU&): void
+}
+
+class LoadInstruction {
+    - reg: uint8_t
+    - operand: uint16_t
+    - isImmediate: bool
+    + decode(rawInstruction: uint16_t): void
+    + execute(cpu: CPU&): void
+}
+
+class StoreInstruction {
+    - reg: uint8_t
+    - address: uint8_t
+    + decode(rawInstruction: uint16_t): void
+    + execute(cpu: CPU&): void
+}
+
+class MoveInstruction {
+    - destReg: uint8_t
+    - srcReg: uint8_t
+    + decode(rawInstruction: uint16_t): void
+    + execute(cpu: CPU&): void
+}
+
+class AddInstruction {
+    - destReg: uint8_t
+    - regS: uint8_t
+    - regT: uint8_t
+    - isFloat: bool
+    + decode(rawInstruction: uint16_t): void
+    + execute(cpu: CPU&): void
+}
+
+class BitwiseInstruction {
+    - destReg: uint8_t
+    - regS: uint8_t
+    - regT: uint8_t
+    - operationType: char
+    + decode(rawInstruction: uint16_t): void
+    + execute(cpu: CPU&): void
+}
+
+class RotateInstruction {
+    - reg: uint8_t
+    - steps: uint8_t
+    + decode(rawInstruction: uint16_t): void
+    + execute(cpu: CPU&): void
+}
+
+class JumpInstruction {
+    - reg: uint8_t
+    - targetAddress: uint8_t
+    + decode(rawInstruction: uint16_t): void
+    + execute(cpu: CPU&): void
+}
+
+class HaltInstruction {
+    + decode(rawInstruction: uint16_t): void
+    + execute(cpu: CPU&): void
+}
+
+class CPU {
+    - memory: Memory
+    - registers: RegisterFile
+    - pc: int
+    - ir: uint16_t
+    + fetch(): void
+    + decode(): Instruction*
+    + executeStep(): bool
+    + validateOpcode(opcode: uint8_t): bool
+    + isValidInstruction(rawInstruction: uint16_t): bool
+    + getMemory(): Memory&
+    + getRegisters(): RegisterFile&
+    + getPC(): int
+    + setPC(value: int): void
+    + getIR(): uint16_t
+}
+
+class VoleMachine {
+    - cpu: CPU
+    - isRunning: bool
+    - programLoaded: bool
+    - screenOutput: string
+    + loadProgram(filename: string, startAddress: int): bool
+    + doOneLine(): bool
+    + doAll(): void
+    + overwriteMemory(address: int, value: uint8_t): void
+    + overwriteRegister(regIndex: int, value: uint8_t): void
+    + appendScreenOutput(value: uint8_t): void
+    + getScreenOutput(): string
+    + isMachineRunning(): bool
+}
+
+class ConsoleUI {
+    - machine: VoleMachine
+    + run(): void
+    + exit(): void
+    + printStatus(): void
+    + printScreen(): void
+    + printMemory(): void
+    + printRegisters(): void
+}
+
+Instruction <|-- LoadInstruction
+Instruction <|-- StoreInstruction
+Instruction <|-- MoveInstruction
+Instruction <|-- AddInstruction
+Instruction <|-- BitwiseInstruction
+Instruction <|-- RotateInstruction
+Instruction <|-- JumpInstruction
+Instruction <|-- HaltInstruction
+
+Memory *-- ByteMemory : contains 256
+RegisterFile *-- ByteMemory : contains 16
+CPU *-- Memory : contains
+CPU *-- RegisterFile : contains
+VoleMachine *-- CPU : contains
+ConsoleUI *-- VoleMachine : contains
+CPU ..> Instruction : creates & executes
+@enduml
