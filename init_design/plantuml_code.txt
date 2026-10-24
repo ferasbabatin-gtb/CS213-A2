@@ -1,0 +1,90 @@
+@startuml vole_machine
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+
+class byteMemory {
+  - data : int
+  + getData() : int
+  + setData(value : int) : void
+  + toFloat() : float
+}
+
+class memory {
+  - data : byteMemory[256]
+  + getAddress(address : int) : int
+  + setAddress(value : int, address : int) : void
+}
+
+class cpuRegisters {
+  - registers : byteMemory[16]
+  + getAddress(address : int) : int
+  + setAddress(value : int, address : int) : void
+}
+
+class cpu {
+  - mem : memory
+  - reg : cpuRegisters
+  - ir : int
+  - pc : int
+  + fetch() : void
+  + DecodeExecute() : int
+  + move(r : int, s : int) : void
+  + load(r : int, xy : int) : void
+  + loadValue(r : int, value : int) : void
+  + store(r : int, xy : int) : void
+  + add(r : int, s : int, t : int) : void
+  + addFloat(r : int, s : int, t : int) : void
+  + op_or(r : int, s : int, t : int) : void
+  + op_and(r : int, s : int, t : int) : void
+  + op_xor(r : int, s : int, t : int) : void
+  + rotate(r : int, x : int) : void
+  + jump(r : int, xy : int) : void
+  + halt() : void
+  + getMemory() : memory&
+  + getRegisters() : cpuRegisters&
+  + getIR() : int
+  + getPC() : int
+  + setPc(value : int) : void
+  + setIr(value : int) : void
+}
+
+class vole_machine {
+  # theCpu : cpu
+  # main_running : bool
+  # loaded_program_processing : bool
+  # screen : string
+  + validate(instruction : string) : int
+  + load(filename : string, startAddress : int) : int
+  + doOneLine() : void
+  + overwriteMemory(mode : bool, address : int, value : int) : void
+  + doAll() : void
+}
+
+class menu {
+  + run() : void
+  + printScreen() : void
+  + printMem() : void
+  + printReg() : void
+  + exit() : void
+}
+
+' Composition
+memory       "1" *-- "256" byteMemory : contains
+cpuRegisters "1" *-- "16"  byteMemory : contains
+cpu          "1" *-- "1"   memory
+cpu          "1" *-- "1"   cpuRegisters
+vole_machine "1" *-- "1"   cpu
+
+' Inheritance
+vole_machine <|-- menu
+
+note right of cpu
+  Opcodes
+  1 load      2 loadValue  3 store
+  4 move      5 add        6 addFloat
+  7 op_or     8 op_and     9 op_xor
+  A rotate    B jump       C halt
+end note
+
+@enduml
