@@ -117,6 +117,10 @@ class VoleMachine {
     + appendScreenOutput(value: uint8_t): void
     + getScreenOutput(): string
     + isMachineRunning(): bool
+    + getPC(): int
+    + getIR(): uint16_t
+    + getRegisters(): RegisterFile&
+    + getMemory(): Memory&
 }
 
 class ConsoleUI {
