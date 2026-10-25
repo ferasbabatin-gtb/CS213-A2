@@ -1,0 +1,164 @@
+@startuml
+title Vole Machine Simulator - Final UML
+
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide empty members
+
+enum ExecutionStatus {
+    CONTINUE
+    HALTED
+    INVALID_INSTRUCTION
+    LOAD_ERROR
+    MEMORY_ERROR
+}
+
+class ByteMemory {
+    - data : int
+    + ByteMemory()
+    + ByteMemory(value : int)
+    + getData() : int
+    + setData(value : int) : void
+}
+
+class VoleFloat {
+    + {static} toFloat(byteValue : int) : double
+    + {static} fromFloat(value : double) : int
+}
+
+class Memory {
+    - cells : ByteMemory[256]
+    + Memory()
+    + read(address : int) : int
+    + write(address : int, value : int) : void
+    + isValidAddress(address : int) : bool
+}
+
+class CPURegisters {
+    - registers : ByteMemory[16]
+    + CPURegisters()
+    + read(index : int) : int
+    + write(index : int, value : int) : void
+    + isValidRegister(index : int) : bool
+}
+
+class ExecutionResult {
+    - status : ExecutionStatus
+    - hasScreenWrite : bool
+    - screenValue : int
+    + ExecutionResult()
+    + ExecutionResult(status : ExecutionStatus, hasScreenWrite : bool, screenValue : int)
+    + getStatus() : ExecutionStatus
+    + hasOutput() : bool
+    + getScreenValue() : int
+}
+
+class MachineSnapshot {
+    - pc : int
+    - ir : int
+    - registerValues : int[16]
+    - memoryValues : int[256]
+    - screenBytes : vector<int>
+    - halted : bool
+    + getPC() : int
+    + getIR() : int
+    + getRegisters() : int[16]
+    + getMemory() : int[256]
+    + getScreenBytes() : vector<int>
+    + isHalted() : bool
+}
+
+class CPU {
+    - mem : Memory&
+    - registers : CPURegisters
+    - ir : int
+    - pc : int
+    - halted : bool
+    - programStart : int
+    - programEndExclusive : int
+
+    + CPU(memory : Memory&)
+    + fetch() : void
+    - validateInstruction(instruction : int) : bool
+    - validateJumpTarget(target : int) : bool
+    + executeOne() : ExecutionResult
+    - decodeExecute() : ExecutionResult
+
+    - load(r : int, xy : int) : void
+    - loadValue(r : int, value : int) : void
+    - store(r : int, xy : int) : void
+    - move(r : int, s : int) : void
+    - add(r : int, s : int, t : int) : void
+    - addFloat(r : int, s : int, t : int) : void
+    - opOr(r : int, s : int, t : int) : void
+    - opAnd(r : int, s : int, t : int) : void
+    - opXor(r : int, s : int, t : int) : void
+    - rotate(r : int, x : int) : void
+    - jump(r : int, xy : int) : ExecutionStatus
+    - halt() : void
+
+    + reset(start : int, endExclusive : int) : void
+    + setRegister(index : int, value : int) : bool
+    + getRegister(index : int) : int
+    + copyRegisters() : int[16]
+    + getPC() : int
+    + getIR() : int
+    + isHalted() : bool
+}
+
+class VoleMachine {
+    - memory : Memory
+    - cpu : CPU
+    - screenBytes : vector<int>
+    - loadedStart : int
+    - loadedEndExclusive : int
+    - programLoaded : bool
+    - running : bool
+
+    + VoleMachine()
+    + loadProgram(filename : string, start : int) : bool
+    - parseProgram(filename : string) : bool
+    - validateProgram() : bool
+    - commitProgram() : void
+    + editMemory(address : int, value : int) : bool
+    + editRegister(index : int, value : int) : bool
+    + step() : ExecutionResult
+    + runAll() : ExecutionResult
+    + reset() : void
+    + getSnapshot() : MachineSnapshot
+    - collectScreenOutput(result : ExecutionResult) : void
+}
+
+class Menu {
+    - machine : VoleMachine&
+    + Menu(machine : VoleMachine&)
+    + run() : void
+    - loadProgramMenu() : void
+    - editMemoryMenu() : void
+    - editRegisterMenu() : void
+    - runAllMenu() : void
+    - stepByStepMenu() : void
+    - printSnapshot(snapshot : MachineSnapshot) : void
+    - printScreen(snapshot : MachineSnapshot) : void
+    - formatScreenByte(value : int) : string
+    + exit() : void
+}
+
+Memory "1" *-- "256" ByteMemory : owns cells
+CPURegisters "1" *-- "16" ByteMemory : owns registers
+
+VoleMachine "1" *-- "1" Memory : owns
+VoleMachine "1" *-- "1" CPU : owns
+
+CPU "1" *-- "1" CPURegisters : owns
+CPU --> "1" Memory : references
+
+CPU ..> VoleFloat : uses for opcode 6
+
+Menu --> "1" VoleMachine : association
+CPU ..> ExecutionResult : creates
+VoleMachine ..> ExecutionResult : processes
+VoleMachine ..> MachineSnapshot : creates
+Menu ..> MachineSnapshot : reads
+ExecutionResult ..> ExecutionStatus : uses
+@enduml
