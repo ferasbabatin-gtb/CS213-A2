@@ -1,0 +1,261 @@
+@startuml VoleMachine
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+hide empty members
+
+class Constants <<header>> {
+  + MEMORY_SIZE = 256
+  + REGISTER_COUNT = 16
+  + SCREEN_ADDRESS = 0xFF
+  + MAX_STEPS = 10000
+}
+
+enum ExecStatus {
+  OK
+  HALTED
+  SCREEN_OUTPUT
+  INVALID_INSTRUCTION
+}
+
+enum StepResult {
+  STEP_OK
+  STEP_HALTED
+  STEP_INVALID_INSTRUCTION
+  STEP_PC_OUT_OF_RANGE
+}
+
+enum LoadStatus {
+  LOAD_OK
+  FILE_NOT_FOUND
+  ODD_ADDRESS
+  ADDRESS_OUT_OF_RANGE
+  PROGRAM_TOO_LARGE
+  INVALID_INSTRUCTION_IN_FILE
+}
+
+enum RunStatus {
+  RUN_HALTED
+  RUN_ERROR
+  RUN_STEP_LIMIT
+}
+
+enum MenuChoice {
+  LOAD_PROGRAM
+  OVERWRITE_CELL
+  RUN_PROGRAM
+  SHOW_STATE
+  QUIT
+}
+
+enum RunMode {
+  RUN_ALL
+  STEP_BY_STEP
+}
+
+class ByteStorage {
+  # cells : vector<uint8_t>
+  # ~ByteStorage()
+  + ByteStorage(size : int)
+  + read(index : int) : uint8_t
+  + write(index : int, value : int) : void
+  + size() : int
+  + clear() : void
+}
+
+class Memory {
+  + Memory()
+}
+
+class CpuRegisters {
+  + CpuRegisters()
+}
+
+class Instruction {
+  - value : uint16_t
+  + Instruction(value : int = 0)
+  + {static} parse(line : string, out : Instruction&) : bool
+  + opcode() : int
+  + r() : int
+  + s() : int
+  + t() : int
+  + x() : int
+  + xy() : int
+  + isValid() : bool
+  + toString() : string
+  + raw() : uint16_t
+}
+
+class Cpu {
+  - reg : CpuRegisters
+  - mem : Memory&
+  - ir : Instruction
+  - pc : int
+  - halted : bool
+  - lastOutput : uint8_t
+  - opLoadMem(r : int, xy : int) : void
+  - opLoadImm(r : int, xy : int) : void
+  - opStore(r : int, xy : int) : ExecStatus
+  - opMove(r : int, s : int) : void
+  - opAdd(r : int, s : int, t : int) : void
+  - opAddFloat(r : int, s : int, t : int) : void
+  - opOr(r : int, s : int, t : int) : void
+  - opAnd(r : int, s : int, t : int) : void
+  - opXor(r : int, s : int, t : int) : void
+  - opRotate(r : int, x : int) : void
+  - opJump(r : int, xy : int) : void
+  - opHalt() : void
+  - byteToFloat(b : uint8_t) : float
+  - floatToByte(f : float) : uint8_t
+  + Cpu(mem : Memory&)
+  + reset(startPc : int) : void
+  + fetch() : bool
+  + decodeExecute() : ExecStatus
+  + getRegisters() : CpuRegisters&
+  + getIR() : Instruction
+  + getPC() : int
+  + getLastOutput() : uint8_t
+  + isHalted() : bool
+  + setPC(value : int) : void
+  + setIR(instr : Instruction) : void
+}
+
+class VoleMachine {
+  - mem : Memory
+  - cpu : Cpu
+  - screen : string
+  - programLoaded : bool
+  - lastStepResult : StepResult
+  - isSkippableLine(line : string) : bool
+  - readProgramFile(file : string, out : vector<Instruction>&, badLine : int&) : LoadStatus
+  + VoleMachine()
+  + loadProgram(file : string, startAddr : int, badLine : int&) : LoadStatus
+  + step() : StepResult
+  + runAll(maxSteps : int) : RunStatus
+  + setMemoryCell(addr : int, value : int) : bool
+  + setRegister(idx : int, value : int) : bool
+  + clearScreen() : void
+  + getMemory() : const Memory&
+  + getRegisters() : const CpuRegisters&
+  + getPC() : int
+  + getIRString() : string
+  + getScreen() : const string&
+  + getLastStepResult() : StepResult
+  + isHalted() : bool
+  + isProgramLoaded() : bool
+}
+
+class Menu {
+  - machine : VoleMachine
+  - running : bool
+  - readHex(prompt : string, min : int, max : int) : int
+  - toHex(value : int, digits : int) : string
+  - loadProgramFlow() : void
+  - overwriteFlow() : void
+  - chooseRunMode() : RunMode
+  - runAllFlow() : void
+  - stepFlow() : void
+  - askExitOrLoad() : void
+  - showError(result : StepResult) : void
+  + Menu()
+  + run() : void
+  + printMem() : void
+  + printReg() : void
+  + printIRandPC() : void
+  + printScreen() : void
+  + printState() : void
+}
+
+ByteStorage <|-- Memory
+ByteStorage <|-- CpuRegisters
+
+Cpu *-- "1" CpuRegisters : reg
+Cpu *-- "1" Instruction : ir
+Cpu o-- "1" Memory : mem (reference)
+
+VoleMachine *-- "1" Memory : mem
+VoleMachine *-- "1" Cpu : cpu
+VoleMachine ..> Instruction : parses file lines
+
+Menu *-- "1" VoleMachine : machine
+
+Cpu ..> ExecStatus : returns
+VoleMachine ..> StepResult : returns
+VoleMachine ..> LoadStatus : returns
+VoleMachine ..> RunStatus : returns
+Menu ..> MenuChoice : uses
+Menu ..> RunMode : uses
+
+Memory ..> Constants : MEMORY_SIZE
+CpuRegisters ..> Constants : REGISTER_COUNT
+
+note right of ByteStorage
+  Size is fixed at construction and never resized.
+  Memory passes MEMORY_SIZE (256, addresses 00..FF).
+  CpuRegisters passes REGISTER_COUNT (16, registers 0..F).
+  All cells start at 0, so unfilled memory is 0000,
+  which is an invalid instruction.
+  write() masks the value to 8 bits.
+  read/write throw out_of_range on a bad index;
+  Menu::readHex prevents that from happening.
+  The destructor is protected: not meant to be
+  deleted through a ByteStorage pointer.
+end note
+
+note right of Instruction
+  Single source of truth for validation:
+  - opcode 0, D, E, F invalid
+  - 40RS: second nibble must be 0
+  - AR0X: third nibble must be 0
+  - C000: remaining nibbles must be 0
+  parse(): reads 4 hex digits (upper or lowercase),
+  ignores anything after them. false means invalid
+  (fewer than 4 hex digits or a failed isValid check).
+  Skipping comments and blank lines is NOT done here.
+end note
+
+note bottom of Cpu
+  fetch(): returns false if pc > 0xFE, otherwise
+  ir = Instruction(mem[pc]<<8 | mem[pc+1]); pc += 2
+  decodeExecute(): if !ir.isValid() return INVALID_INSTRUCTION,
+  else switch on ir.opcode()
+  reset(startPc): pc = startPc, ir = 0, halted = false
+  Rotate uses x % 8.
+  lastOutput is the raw byte of the last store to FF.
+  The CPU never decides how output looks.
+  byteToFloat / floatToByte are used only by opAddFloat.
+end note
+
+note bottom of VoleMachine
+  IMPORTANT: mem must be declared BEFORE cpu,
+  because Cpu holds a reference to mem.
+
+  isSkippableLine(): true for empty, whitespace-only,
+  or lines whose first non-space character is ';'
+  readProgramFile(): loops over every physical line,
+  counting all of them so badLine matches the editor,
+  skips lines using isSkippableLine, parses the rest
+  with Instruction::parse, and rejects the whole
+  program on the first invalid line
+  loadProgram(): checks address is even and <= FE,
+  calls readProgramFile, checks startAddr + 2*count <= 0x100,
+  and only then writes memory, calls cpu.reset(startAddr)
+  and sets programLoaded = true
+  step(): if halted or no program loaded, returns STEP_HALTED.
+  Otherwise fetch, decodeExecute, and if the status is
+  SCREEN_OUTPUT convert cpu.getLastOutput() to text
+  (ASCII, hex or both: decided here, in one place) and
+  append it to screen. Maps ExecStatus to StepResult
+  and stores it in lastStepResult.
+  runAll(): loops step() until halt, error or maxSteps
+  getIRString(): returns cpu.getIR().toString()
+end note
+
+note bottom of Menu
+  Menu never sees Instruction.
+  It displays the IR string from the machine
+  and formats PC, memory and registers with toHex().
+  showError() uses getLastStepResult() to explain
+  why execution stopped (requirement 11).
+end note
+
+@enduml
