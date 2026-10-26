@@ -129,7 +129,7 @@ class ConsoleUI {
     + exit(): void
     + printStatus(): void
     + printScreen(): void
-    + printMemory(): void
+    + printMemoryMatrix(): void
     + printRegisters(): void
 }
 
