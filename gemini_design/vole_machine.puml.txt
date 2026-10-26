@@ -11,9 +11,12 @@ class ByteMemory {
 
 class Memory {
     - cells: ByteMemory[256]
+    - onScreenWrite: function
     + read(address: int): uint8_t
     + write(address: int, value: uint8_t): void
     + getCell(address: int): ByteMemory&
+    + setScreenWriteCallback(callback: function): void
+    + reset(): void
 }
 
 class RegisterFile {
@@ -21,10 +24,11 @@ class RegisterFile {
     + read(regIndex: int): uint8_t
     + write(regIndex: int, value: uint8_t): void
     + getRegister(regIndex: int): ByteMemory&
+    + reset(): void
 }
 
 abstract class Instruction {
-    + {abstract} decode(rawInstruction: uint16_t): void
+    + {static} create(rawInstruction: uint16_t): Instruction*
     + {abstract} execute(cpu: CPU&): void
 }
 
@@ -32,21 +36,21 @@ class LoadInstruction {
     - reg: uint8_t
     - operand: uint16_t
     - isImmediate: bool
-    + decode(rawInstruction: uint16_t): void
+    + LoadInstruction(rawInstruction: uint16_t)
     + execute(cpu: CPU&): void
 }
 
 class StoreInstruction {
     - reg: uint8_t
     - address: uint8_t
-    + decode(rawInstruction: uint16_t): void
+    + StoreInstruction(rawInstruction: uint16_t)
     + execute(cpu: CPU&): void
 }
 
 class MoveInstruction {
     - destReg: uint8_t
     - srcReg: uint8_t
-    + decode(rawInstruction: uint16_t): void
+    + MoveInstruction(rawInstruction: uint16_t)
     + execute(cpu: CPU&): void
 }
 
@@ -55,7 +59,7 @@ class AddInstruction {
     - regS: uint8_t
     - regT: uint8_t
     - isFloat: bool
-    + decode(rawInstruction: uint16_t): void
+    + AddInstruction(rawInstruction: uint16_t)
     + execute(cpu: CPU&): void
 }
 
@@ -64,26 +68,26 @@ class BitwiseInstruction {
     - regS: uint8_t
     - regT: uint8_t
     - operationType: char
-    + decode(rawInstruction: uint16_t): void
+    + BitwiseInstruction(rawInstruction: uint16_t)
     + execute(cpu: CPU&): void
 }
 
 class RotateInstruction {
     - reg: uint8_t
     - steps: uint8_t
-    + decode(rawInstruction: uint16_t): void
+    + RotateInstruction(rawInstruction: uint16_t)
     + execute(cpu: CPU&): void
 }
 
 class JumpInstruction {
     - reg: uint8_t
     - targetAddress: uint8_t
-    + decode(rawInstruction: uint16_t): void
+    + JumpInstruction(rawInstruction: uint16_t)
     + execute(cpu: CPU&): void
 }
 
 class HaltInstruction {
-    + decode(rawInstruction: uint16_t): void
+    + HaltInstruction(rawInstruction: uint16_t)
     + execute(cpu: CPU&): void
 }
 
@@ -97,6 +101,7 @@ class CPU {
     + executeStep(): bool
     + validateOpcode(opcode: uint8_t): bool
     + isValidInstruction(rawInstruction: uint16_t): bool
+    + reset(): void
     + getMemory(): Memory&
     + getRegisters(): RegisterFile&
     + getPC(): int
@@ -112,8 +117,10 @@ class VoleMachine {
     + loadProgram(filename: string, startAddress: int): bool
     + doOneLine(): bool
     + doAll(): void
+    + reset(): void
     + overwriteMemory(address: int, value: uint8_t): void
     + overwriteRegister(regIndex: int, value: uint8_t): void
+    + setupScreenCallback(): void
     + appendScreenOutput(value: uint8_t): void
     + getScreenOutput(): string
     + isMachineRunning(): bool
@@ -149,4 +156,5 @@ CPU *-- RegisterFile : contains
 VoleMachine *-- CPU : contains
 ConsoleUI *-- VoleMachine : contains
 CPU ..> Instruction : creates & executes
+VoleMachine ..> Memory : registers screen callback
 @enduml
