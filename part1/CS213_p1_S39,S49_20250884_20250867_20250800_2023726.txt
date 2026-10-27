@@ -1,0 +1,20 @@
+;_____________________________________
+;vole machine program 1
+;purpose:
+;load two numbers(4,2)
+;substract the second from the frist
+;print it
+;_____________________________________
+
+2104 ; load the first number
+2202 ; load the second number
+23ff ; load ff(11...11) to register 3
+2401 ; load 1 to register 4
+9223 ; flit 0 to 1 and 1 to 0
+5224 ; add 1 to the result (2's complemnt)
+5212 ; the difference
+32FF ; move to ff for printing
+C000 ; halt
+
+
+

@@ -1,0 +1,21 @@
+;_____________________________________
+;vole machine program 2
+;purpose:
+;load three numbers(3,2,14)
+;find the nand of the first two
+;find the xnor with the result and third number
+;print the final result
+;_____________________________________
+2103 ;load the first number
+2202 ;load the second number
+230E ;load the third number
+
+25FF ;load FF to be used as a not gate
+
+8412 ;find and
+9445 ;find nand
+9443 ;find xor
+9445 ;find xnor
+34FF ;printing
+
+C000 ;halt
