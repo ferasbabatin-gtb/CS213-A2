@@ -4,7 +4,7 @@
 ;load three numbers(3,2,14)
 ;find the nand of the first two
 ;find the xnor with the result and third number
-;print the final result
+;print the final result(0x0C)
 ;_____________________________________
 2103 ;load the first number
 2202 ;load the second number
