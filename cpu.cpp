@@ -7,10 +7,23 @@ class Cpu {
         int pc;
         bool halted;
         uint8_t lastOutput;
-        void opLoadMem(int r, int xy);
-        void opLoadImm(int r, int xy);
-        ExecStatus opStore(int r, int xy);
-        void opMove(int r, int s);
+        void opLoadMem(int r, int xy){
+            reg.write(r, mem.read(xy));
+        };
+        void opLoadImm(int r, int xy){
+            reg.write(r, xy);
+        };
+        ExecStatus opStore(int r, int xy){
+            if(xy==0xFF){
+                lastOutput = reg.read(r);
+                return ExecStatus::SCREEN_OUTPUT;
+            }
+            mem.write(xy, reg.read(r));
+            return ExecStatus::OK;
+        };
+        void opMove(int r, int s){
+            reg.write(s, reg.read(r));
+        };
         void opAdd(int r, int s, int t);
         void opAddFloat(int r, int s, int t);
         void opOr(int r, int s, int t);
@@ -27,11 +40,11 @@ class Cpu {
         void reset(int startPc);
         bool fetch();
         ExecStatus decodeExecute();
-        Instruction getIR() const;
-        int getPC() const;
-        uint8_t getLastOutput() const;
-        bool isHalted() const;
-        uint8_t getRegister(int idx) const;
+        Instruction getIR();
+        int getPC();
+        uint8_t getLastOutput();
+        bool isHalted();
+        uint8_t getRegister(int idx);
         bool setRegister(int idx, int value);
 
 }
