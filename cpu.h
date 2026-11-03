@@ -7,6 +7,7 @@ class Cpu {
         int pc;
         bool halted;
         uint8_t lastOutput;
+        Instruction ir;
         void opLoadMem(int r, int xy);
         void opLoadImm(int r, int xy);
         ExecStatus opStore(int r, int xy);
