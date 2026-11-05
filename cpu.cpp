@@ -93,4 +93,26 @@ ExecStatus Cpu::decodeExecute(){
         default:
             return ExecStatus::INVALID_INSTRUCTION;
     }
-}   
+}
+Instruction Cpu::getIR(){
+    return ir;
+}
+int Cpu::getPC(){
+        return pc;
+        }
+uint8_t Cpu::getLastOutput(){
+            return lastOutput;
+        }
+bool Cpu::isHalted(){
+            return halted;
+        }
+uint8_t Cpu::getRegister(int idx){
+            return reg.read(idx);
+        }
+bool Cpu::setRegister(int idx, int value){
+            if(!reg.isValidIndex(idx)){
+                return false;
+            }
+            reg.write(idx, value);
+            return true;
+        }
