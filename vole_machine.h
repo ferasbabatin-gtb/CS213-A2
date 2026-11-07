@@ -43,7 +43,7 @@ enum class ScreenFormat {
 
 class Screen {
 private:
-    vector<uint8_t> output; 
+    vector<uint8_t> bytes; 
     ScreenFormat format;    
 
 public:
