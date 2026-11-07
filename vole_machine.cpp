@@ -39,3 +39,31 @@ enum class ScreenFormat {
     HEX,
     DECIMAL
 };
+
+// =============== SCREEN ===============
+
+// This class holds the bytes the program prints
+class Screen {
+private:
+    vector<uint8_t> output; // Stores the printed bytes
+    ScreenFormat format;    // How we want to display them
+
+public:
+    Screen() {
+        format = ScreenFormat::ASCII; // Default format
+    }
+
+    // Add a new byte to the output when the program prints
+    void append(uint8_t value) {
+        output.push_back(value);
+    }
+
+    // Clear the screen for a new program
+    void clear() {
+        output.clear();
+    }
+
+    // Change how the screen is formatted
+    void setFormat(ScreenFormat f) {
+        format = f;
+    }
