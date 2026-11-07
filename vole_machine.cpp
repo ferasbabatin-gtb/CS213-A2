@@ -113,7 +113,7 @@ LoadStatus VoleMachine::loadProgram(const string& file, int startAddr, int& badL
 
     for (int i = 0; i < instructions.size(); i++) {
         int address = startAddr + i * 2;
-        int value = instructions[i].value();
+        int value = instructions[i].raw(); 
         
         mem.write(address, value / 256);       
         mem.write(address + 1, value % 256);   
