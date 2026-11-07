@@ -91,3 +91,21 @@ public:
         return result;
     }
 };
+
+// =============== VOLE MACHINE ===============
+
+class VoleMachine {
+private:
+    Memory mem;          //  machine's main memory
+    Cpu cpu;             // machine's processor
+    Screen screen;       // machine's output screen
+    bool programLoaded;  // tracks if a program is ready to run
+
+    // These two functions are explicitly in the UML design
+    bool isSkippableLine(const string& line) const;
+    LoadStatus readProgramFile(const string& file, vector<Instruction>& out, int& badLine) const;
+
+public:
+    VoleMachine() : mem(), cpu(mem) { // Constructor
+        programLoaded = false; // Nothing is loaded at start
+    }
