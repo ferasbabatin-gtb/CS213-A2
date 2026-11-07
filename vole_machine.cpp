@@ -67,3 +67,32 @@ public:
     void setFormat(ScreenFormat f) {
         format = f;
     }
+
+    // convert the stored bytes into a printable string
+    string toString() const {
+        string result = "";
+
+        for (int i = 0; i < output.size(); i++) { // loop through every byte
+
+            if (format == ScreenFormat::ASCII) {
+                if (output[i] >= 32 && output[i] <= 126) {
+                    result += (char)output[i]; // Show readable characters
+                } else {
+                    result += '.'; // Show a dot for unreadable characters
+                }
+            }
+            else if (format == ScreenFormat::DECIMAL) {
+                result += to_string(output[i]) + " "; // Show as normal numbers
+            }
+            else {
+                // Manual hex conversion to uppercase letters
+                const char digits[] = "0123456789ABCDEF";
+                result += digits[output[i] / 16];
+                result += digits[output[i] % 16];
+                result += " ";
+            }
+        }
+
+        return result;
+    }
+};
