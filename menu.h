@@ -1,17 +1,21 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "cpu.h"
-#include "memory.h"
+#include <string>
+#include "vole_machine.h" 
 
 class Menu {
 private:
-    CPU& cpu;
-    Memory& memory;
+    VoleMachine& machine; 
+    bool running;
 
 public:
-    Menu(CPU& cpuObj, Memory& memObj);
-    void display();
-};
+   
+    Menu(VoleMachine& machineObj);
 
-#endif
+    
+    void loadProgram(std::string filename);
+    void loadInteractive(std::string val, int digits);
+    void loadStepByStep(std::string val, int digits);
+    void loadInstantaneous();
+    void chooseExecutionMode();
