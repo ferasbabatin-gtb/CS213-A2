@@ -19,3 +19,11 @@ public:
     void loadStepByStep(std::string val, int digits);
     void loadInstantaneous();
     void chooseExecutionMode();
+
+
+    void runProgram();
+    void displayMenu();
+    void displayCPU();
+    void displayMemory();
+    void displayStatus();
+
