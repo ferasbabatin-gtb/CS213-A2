@@ -26,4 +26,10 @@ public:
     void displayStatus();
     void editCell(int address, std::string value);
     void editRegister(int regIndex, std::string value);
-}
+    void printMemory();
+    void printRegisters();
+    void printStatus();
+    void mainLoop();
+    void run();
+};
+#endif
