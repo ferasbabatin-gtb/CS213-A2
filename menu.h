@@ -2,8 +2,9 @@
 #define MENU_H
 
 #include <string>
-#include "vole_machine.h" 
-
+#include "VoleMachine.h" 
+#include "Constants.h"
+#include "stdexcept"
 class Menu 
 {
 private:

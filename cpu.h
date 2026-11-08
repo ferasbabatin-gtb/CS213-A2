@@ -1,5 +1,12 @@
+#ifndef CPU_H
+#define CPU_H
+
 #include <iostream>
+#include "ByteStorage.h"
+#include "Constants.h"
+#include "Instruction.h"
 using namespace std;
+
 class Cpu {
     private:
         CpuRegisters reg;
@@ -35,4 +42,6 @@ class Cpu {
         uint8_t getRegister(int idx);
         bool setRegister(int idx, int value);
 
-}
+};
+
+#endif
