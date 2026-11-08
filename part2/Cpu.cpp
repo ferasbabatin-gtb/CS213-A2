@@ -35,11 +35,13 @@ void Cpu::opAddFloat(int r, int s, int t){
     reg.write(r,floatToByte(a+b));
 }
 ExecStatus Cpu::opStore(int r, int xy){
+    mem.write(xy, reg.read(r));
             if(xy==0xFF){
                 lastOutput = reg.read(r);
+                
                 return ExecStatus::SCREEN_OUTPUT;
             }
-            mem.write(xy, reg.read(r));
+           
             return ExecStatus::OK;
         }
 void Cpu::opMove(int r, int s){
