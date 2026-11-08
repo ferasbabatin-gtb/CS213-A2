@@ -29,7 +29,10 @@ void Cpu::opAdd(int r, int s, int t){
     reg.write(r,reg.read(s)+reg.read(t));
 }
 void Cpu::opAddFloat(int r, int s, int t){
-    
+    int a = byteToFloat(reg.read(s));
+
+    int b = byteToFloat(reg.read(t));
+    reg.write(r,floatToByte(1+b));
 }
 ExecStatus Cpu::opStore(int r, int xy){
             if(xy==0xFF){
@@ -60,6 +63,14 @@ void Cpu::opRotate(int r, int x){
     
     reg.write(r,ans);
 }
+void Cpu::opJump(int r, int xy){
+    if(reg.read(r) == reg.read(0)){
+        pc=xy;
+    };
+};
+void Cpu::opHalt(){
+    this->halted = true;
+};
 void Cpu::reset(int startPc){
     pc = startPc;
     halted = false;
