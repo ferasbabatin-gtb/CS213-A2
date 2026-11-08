@@ -7,29 +7,34 @@
 class Menu 
 {
 private:
-    VoleMachine& machine; 
+    private:
+    VoleMachine machine;
     bool running;
 
+    int readHex(string prompt);
+    string toHex(int value, int digits);
+
+    void printMenu();
+    void loadProgramFlow();
+    void overwriteFlow();
+    RunMode chooseRunMode();
+    ScreenFormat chooseScreenFormat();
+    void runProgramFlow();
+    void runAllFlow();
+    void stepFlow();
+    bool wantToExit();
+
+    void showError(StepResult result);
+    void showLoadError(LoadStatus result, int badLine);
+
+    void printMem();
+    void printReg();
+    void printIRandPC();
+    void printScreen();
+    void printState();
 public:
    
-    Menu(VoleMachine& machineObj);
-
-    void loadProgram(std::string filename);
-    void loadInteractive(std::string val, int digits);
-    void loadStepByStep(std::string val, int digits);
-    void loadInstantaneous();
-    void chooseExecutionMode();
-    void runProgram();
-    void displayMenu();
-    void displayCPU();
-    void displayMemory();
-    void displayStatus();
-    void editCell(int address, std::string value);
-    void editRegister(int regIndex, std::string value);
-    void printMemory();
-    void printRegisters();
-    void printStatus();
-    void mainLoop();
+    Menu();
     void run();
 };
 #endif
