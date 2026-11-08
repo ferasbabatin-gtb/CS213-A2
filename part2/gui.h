@@ -26,6 +26,7 @@
 #include <QHBoxLayout>
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QMessageBox>
 #include <QShortcut>
 #include <QKeySequence>
 #include <QGraphicsDropShadowEffect>
@@ -72,6 +73,7 @@ private:
     void setStatus(const QString& text, bool isError);
     void setReady(bool value);
     void showStepResult(StepResult r);
+    void askExitOrLoad();
     QString loadErrorText(LoadStatus s, int badLine) const;
     void setCellState(QLabel* label, int& stored, int state);
     static QString hx(int value, int digits);
@@ -80,6 +82,7 @@ private:
     VoleMachine machine;
     bool ready;
     bool halted;
+    bool finishedAsked;       // the "exit or load another?" question is asked once per run
     bool cursorOn;
     QString screenText;
     QStringList logLines;     // console messages (HTML), newest last

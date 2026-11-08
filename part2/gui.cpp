@@ -87,7 +87,7 @@ QString Gui::hx(int value, int digits) {
 // ---------- construction ----------
 
 Gui::Gui(QWidget* parent)
-    : QMainWindow(parent), machine(), ready(false), halted(false), cursorOn(true) {
+    : QMainWindow(parent), machine(), ready(false), halted(false), finishedAsked(false), cursorOn(true) {
     prevMem.fill(0);
     prevReg.fill(0);
     memState.fill(-1);   // -1 forces the first style to be applied
@@ -429,6 +429,12 @@ void Gui::showStepResult(StepResult r) {
             setStatus("Error: Step limit reached.", true);
             break;
     }
+
+    // The run is over (halted or stopped by an error): ask once whether to exit or load another.
+    if (r != StepResult::STEP_OK && r != StepResult::STEP_NOT_LOADED && !finishedAsked) {
+        finishedAsked = true;
+        QTimer::singleShot(0, this, [this]() { askExitOrLoad(); });   // after the window has repainted
+    }
 }
 
 // ---------- actions (the Menu's functions) ----------
@@ -459,6 +465,7 @@ void Gui::onLoad() {
     }
 
     halted = false;
+    finishedAsked = false;
     setReady(true);
     refresh(false);
     setStatus("Program loaded at " + hx(addr, 2) + ".", false);
@@ -493,6 +500,21 @@ void Gui::onEdit() {
     refresh(true);
     setStatus(QString(isReg ? "Register R%1" : "Memory at %1").arg(hx(idx, isReg ? 1 : 2))
               + " overwritten with " + hx(val & 0xFF, 2) + ".", false);
+}
+
+void Gui::askExitOrLoad() {
+    QMessageBox box(this);
+    box.setWindowTitle("Program finished");
+    box.setText("Do you want to exit or load another program?");
+    QPushButton* loadAnother = box.addButton("Load another", QMessageBox::AcceptRole);
+    QPushButton* exitButton  = box.addButton("Exit", QMessageBox::DestructiveRole);
+    box.setDefaultButton(loadAnother);
+    box.exec();
+    if (box.clickedButton() == exitButton) {
+        close();
+    } else if (box.clickedButton() == loadAnother) {
+        onLoad();
+    }
 }
 
 void Gui::onStep() {
