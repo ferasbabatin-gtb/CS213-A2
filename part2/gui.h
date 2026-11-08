@@ -94,7 +94,7 @@ private:
     QLabel*      irLabel;
     QLabel*      haltLabel;
     QTextEdit*   consoleView;
-    QLabel*      screenLabel;
+    QTextEdit*   screenView;
     QLabel*      regLabels[16];
     QLabel*      memCells[256];
     QPushButton* loadBtn;
