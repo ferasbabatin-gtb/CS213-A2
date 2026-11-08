@@ -5,6 +5,7 @@
 #include "ByteStorage.h"
 #include "Constants.h"
 #include "Instruction.h"
+#include <cmath>
 using namespace std;
 
 class Cpu {
@@ -35,11 +36,11 @@ class Cpu {
         void reset(int startPc);
         bool fetch();
         ExecStatus decodeExecute();
-        Instruction getIR();
-        int getPC();
+        Instruction getIR() const;
+        int getPC() const;
         uint8_t getLastOutput();
         bool isHalted();
-        uint8_t getRegister(int idx);
+        uint8_t getRegister(int idx) const;
         bool setRegister(int idx, int value);
 
 };

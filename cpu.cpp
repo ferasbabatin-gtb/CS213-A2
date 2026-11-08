@@ -2,13 +2,35 @@
 #include "Cpu.h"
 using namespace std;
 
+float Cpu::byteToFloat(uint8_t b){
+int s = (b >> 7) == 0 ? 1 : -1;
+int expo = ((b >> 4) & (0b111)) - (1<<2);
+int mant = b & 0b1111;
+return s*(pow(2,expo))*(mant*0.0625);
 
+}
+uint8_t Cpu::floatToByte(float f){
+    if(f==0){
+        return 0;
+    }
+    int expo = floor(log2(abs(f))) + 5;
+    int sign = f>0?  0:1;
+    int mant = abs((f / (pow(2,expo-4))) * 16);
+    return ((expo & 0b111) << 4) + ((mant & 0b1111)) + (sign << 7);
+}
 void Cpu::opLoadMem(int r, int xy){
             reg.write(r, mem.read(xy));
         }
 void Cpu::opLoadImm(int r, int xy){
             reg.write(r, xy);
         }
+
+void Cpu::opAdd(int r, int s, int t){
+    reg.write(r,reg.read(s)+reg.read(t));
+}
+void Cpu::opAddFloat(int r, int s, int t){
+    
+}
 ExecStatus Cpu::opStore(int r, int xy){
             if(xy==0xFF){
                 lastOutput = reg.read(r);
@@ -94,10 +116,10 @@ ExecStatus Cpu::decodeExecute(){
             return ExecStatus::INVALID_INSTRUCTION;
     }
 }
-Instruction Cpu::getIR(){
+Instruction Cpu::getIR() const {
     return ir;
 }
-int Cpu::getPC(){
+int Cpu::getPC() const{
         return pc;
         }
 uint8_t Cpu::getLastOutput(){
@@ -106,10 +128,10 @@ uint8_t Cpu::getLastOutput(){
 bool Cpu::isHalted(){
             return halted;
         }
-uint8_t Cpu::getRegister(int idx){
+uint8_t Cpu::getRegister(int idx) const{
             return reg.read(idx);
         }
-bool Cpu::setRegister(int idx, int value){
+bool Cpu::setRegister(int idx, int value) {
             if(!reg.isValidIndex(idx)){
                 return false;
             }

@@ -45,7 +45,7 @@ class Screen {
 private:
     vector<uint8_t> bytes; 
     ScreenFormat format;    
-
+    string formatBytes(const vector<uint8_t> & bytes,ScreenFormat format) const;
 public:
     Screen(); 
     void append(uint8_t value);

@@ -16,7 +16,7 @@ void Screen::setFormat(ScreenFormat f) {
     format = f;
 }
 
-string Screen::toString() const { 
+string Screen::formatBytes(const vector<uint8_t> & bytes,ScreenFormat format) const{
     string result = "";
 
     for (int i = 0; i < bytes.size(); i++) { 
@@ -38,6 +38,9 @@ string Screen::toString() const {
         }
     }
     return result;
+}
+string Screen::toString() const { 
+    return formatBytes(bytes,format);
 }
 
 VoleMachine::VoleMachine() : mem(), cpu(mem) { 
@@ -113,7 +116,7 @@ LoadStatus VoleMachine::loadProgram(const string& file, int startAddr, int& badL
 
     for (int i = 0; i < instructions.size(); i++) {
         int address = startAddr + i * 2;
-        int value = instructions[i].raw(); 
+        int value = instructions[i].opcode()*(1<<12) +instructions[i].r()*(1<<8) + instructions[i].xy(); 
         
         mem.write(address, value / 256);       
         mem.write(address + 1, value % 256);   
@@ -180,11 +183,11 @@ uint8_t VoleMachine::getMemoryCell(int addr) const {
 }
 
 bool VoleMachine::setRegister(int idx, int value) { 
-    return cpu.getRegisters().write(idx, value);
+    return cpu.setRegister(idx, value);
 }
 
 uint8_t VoleMachine::getRegister(int idx) const { 
-    return cpu.getRegisters().read(idx);
+    return cpu.getRegister(idx);
 }
 
 int VoleMachine::getPC() const { 
