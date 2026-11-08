@@ -35,7 +35,7 @@ string Instruction::toString() const {
 }
 bool Instruction::parse(const std::string& line, Instruction& out){
     for(int i = 0;i<4;i++){
-        if((line[i]<='F' && line[i]>='A') || (line[i]>='0' && line[i]<='9')){
+        if((line[i]<='F' && line[i]>='A') || (line[i]>='0' && line[i]<='9' ||( line[i]>='a' && line[i]<='f'))){
             continue;
         }
         else{

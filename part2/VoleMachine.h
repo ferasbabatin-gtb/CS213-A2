@@ -8,7 +8,7 @@
 #include <cstdint>
 
 #include "Constants.h"
-#include "Memory.h"
+#include "ByteStorage.h"
 #include "Cpu.h"
 #include "Instruction.h"
 

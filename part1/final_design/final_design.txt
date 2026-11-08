@@ -167,7 +167,7 @@ class Menu {
   - readHex(prompt : string) : int
   - toHex(value : int, digits : int) : string
   - printMenu() : void
-  - loadProgramFlow() : void
+  - loadProgramFlow() : bool
   - overwriteFlow() : void
   - chooseRunMode() : RunMode
   - chooseScreenFormat() : ScreenFormat

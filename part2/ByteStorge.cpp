@@ -26,4 +26,6 @@ void ByteStorage::clear() {
 bool ByteStorage::isValidIndex(int index) const {
     return index >= 0 && index < size();
 }
+CpuRegisters::CpuRegisters() : ByteStorage(REGISTER_COUNT) {}
+Memory::Memory() : ByteStorage(MEMORY_SIZE) {}
 

@@ -11,7 +11,7 @@ using namespace std;
 class Cpu {
     private:
         CpuRegisters reg;
-        Memory mem;
+        Memory& mem;
         int pc;
         bool halted;
         uint8_t lastOutput;

@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Cpu.h"
 using namespace std;
-
+Cpu::Cpu(Memory& m) : mem(m), pc(0), halted(false), lastOutput(0), ir(0) {}
 float Cpu::byteToFloat(uint8_t b){
 int s = (b >> 7) == 0 ? 1 : -1;
 int expo = ((b >> 4) & (0b111)) - (1<<2);
@@ -29,10 +29,10 @@ void Cpu::opAdd(int r, int s, int t){
     reg.write(r,reg.read(s)+reg.read(t));
 }
 void Cpu::opAddFloat(int r, int s, int t){
-    int a = byteToFloat(reg.read(s));
+    float a = byteToFloat(reg.read(s));
 
-    int b = byteToFloat(reg.read(t));
-    reg.write(r,floatToByte(1+b));
+    float b = byteToFloat(reg.read(t));
+    reg.write(r,floatToByte(a+b));
 }
 ExecStatus Cpu::opStore(int r, int xy){
             if(xy==0xFF){

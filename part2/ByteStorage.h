@@ -3,7 +3,7 @@
 
 #include <vector>
 #include <cstdint>
-
+#include "Constants.h"
 class ByteStorage {
 protected:
     std::vector<uint8_t> cells;

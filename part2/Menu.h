@@ -16,7 +16,7 @@ private:
     string toHex(int value, int digits);
 
     void printMenu();
-    void loadProgramFlow();
+    bool loadProgramFlow();
     void overwriteFlow();
     RunMode chooseRunMode();
     ScreenFormat chooseScreenFormat();

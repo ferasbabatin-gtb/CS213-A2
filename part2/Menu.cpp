@@ -35,7 +35,14 @@ ScreenFormat Menu::chooseScreenFormat() {
     cout << "2. HEX\n";
     cout << "3. DECIMAL\n";
     int choice;
-    cin >> choice;
+    string input;
+    getline(cin,input);
+    try{
+    choice = stoi(input);
+    }
+    catch(const exception & e){
+        choice = 4;
+    }
     switch (choice) {
         case 1: return ScreenFormat::ASCII;
         case 2: return ScreenFormat::HEX;
@@ -49,21 +56,22 @@ RunMode Menu::chooseRunMode() {
     cout << "Choose run mode:\n";
     cout << "1. Run All\n";
     cout << "2. Step\n";
-    int choice;
-    cin >> choice;
-    switch (choice) {
-        case 1: return RunMode::RUN_ALL;
-        case 2: return RunMode::STEP_BY_STEP;
-        default: 
-            cout << "Invalid choice, defaulting to Run All.\n";
-            return RunMode::RUN_ALL;
-    }
+    
+    string input;
+    getline(cin,input);
+    
+    if(input == "1") return RunMode::RUN_ALL;
+    else if(input == "2") return RunMode::STEP_BY_STEP;
+    else{cout << "Invalid choice, defaulting to Run All.\n";
+            return RunMode::RUN_ALL;}
+    
 }
 void Menu::overwriteFlow() {
     cout << "Memory or cpu register overwrite(1 for memroy,0 for cpu registers)?\n";
-    int choice;
-    cin >> choice;
-    if(choice == 0){
+
+    string input;
+    getline(cin,input);
+    if(input == "0"){
         int regIndex = readHex("Enter register index (0-15 in hex): ");
         int value = readHex("Enter new value (in hex): ");
         if(!machine.setRegister(regIndex, value)) {
@@ -71,7 +79,7 @@ void Menu::overwriteFlow() {
             return;
         }
         cout << "Register R" << toHex(regIndex, 1) << " overwritten with " << toHex(value, 4) << ".\n";
-    } else if(choice == 1){
+    } else if(input == "1"){
         int addr = readHex("Enter address to overwrite (in hex): ");
         int value = readHex("Enter new value (in hex): ");
         if(!machine.setMemoryCell(addr, value)) {
@@ -83,7 +91,7 @@ void Menu::overwriteFlow() {
         cout << "Invalid choice. Please enter 0 for CPU register or 1 for memory.\n";
     }
     }
-void Menu::loadProgramFlow() {
+bool Menu::loadProgramFlow() {
     string filename;
     cout << "Enter program filename: ";
     getline(cin, filename);
@@ -92,11 +100,13 @@ void Menu::loadProgramFlow() {
     LoadStatus status = machine.loadProgram(filename, startAddr, badLine);
     if (status != LoadStatus::LOAD_OK) {
         showLoadError(status, badLine);
+        return false;
     } else {
         cout << "Program loaded successfully.\n";
         cout << "enter screen format for display:\n";
         machine.setScreenFormat(chooseScreenFormat());
         printState();
+        return true;
     }  
 }
 void Menu::showLoadError(LoadStatus result, int badLine) {
@@ -162,6 +172,7 @@ void Menu::runAllFlow() {
     StepResult result = machine.runAll(MAX_STEPS);
     if (result != StepResult::STEP_HALTED) {
         showError(result);
+        printState();
     } else {
         printState();
     }
@@ -208,7 +219,7 @@ void Menu::printState() {
 void Menu::printIRandPC(){
     cout << "=== Instruction Register and Program Counter ===\n";
     cout << "IR: " << machine.getIRString() << "\n";
-    cout << "PC: " << toHex(machine.getPC(), 4) << "\n";
+    cout << "PC: " << toHex(machine.getPC(), 2) << "\n";
 }
 void Menu::printScreen(){
     cout << "=== Screen State ===\n";
@@ -221,12 +232,18 @@ void Menu::runProgramFlow() {
     } else if (mode == RunMode::STEP_BY_STEP) {
         stepFlow();
     }
+    if(wantToExit()){
+        running = false;
+    }
+    else{
+        if(loadProgramFlow()) runProgramFlow();
+    }
 }
 bool Menu::wantToExit() {
-    char choice;
-    cout << "Do you want to exit? (y/n): ";
-    cin >> choice;
-    if (choice == 'y' || choice == 'Y') {
+    string choice;
+    cout << "Do you want to exit or load an other program? (y/n): ";
+    getline(cin,choice);
+    if (choice == "y" || choice == "Y") {
         return true;
     }
     else {
