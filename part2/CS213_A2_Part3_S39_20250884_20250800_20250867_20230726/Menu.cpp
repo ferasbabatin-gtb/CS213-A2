@@ -254,8 +254,14 @@ void Menu::run() {
     int choice = 0;
     while (running) {
         printMenu();
-        cin >> choice;
-        cin.ignore();
+        string input;
+        getline(cin,input);
+        try{
+            choice = stoi(input);
+        }
+        catch(const  exception & e){
+            choice = 5;
+        }
         switch (choice) {
             case 1:
                 loadProgramFlow();
