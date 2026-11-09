@@ -16,7 +16,7 @@ void Screen::setFormat(ScreenFormat f) {
     format = f;
 }
 
-string Screen::formatBytes(const vector<uint8_t> & bytes, ScreenFormat format) const {
+string Screen::formatBytes(const vector<uint8_t> & bytes, ScreenFormat format){
     string result = "";
 
     for (int i = 0; i < bytes.size(); i++) { 

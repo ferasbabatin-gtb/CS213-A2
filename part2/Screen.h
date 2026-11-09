@@ -12,7 +12,7 @@ class Screen {
 private:
     vector<uint8_t> bytes; 
     ScreenFormat format;    
-    string formatBytes(const vector<uint8_t> & bytes, ScreenFormat format) const;
+    static string formatBytes(const vector<uint8_t> & bytes, ScreenFormat format);
 
 public:
     Screen(); 
