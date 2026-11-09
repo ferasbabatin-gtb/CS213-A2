@@ -1,0 +1,2 @@
+C:\Qt\Tools\mingw1310_64\bin\ar.exe qc libvole_core.a CMakeFiles/vole_core.dir/vole_core_autogen/mocs_compilation.cpp.obj CMakeFiles/vole_core.dir/ByteStorge.cpp.obj CMakeFiles/vole_core.dir/Cpu.cpp.obj CMakeFiles/vole_core.dir/Instruction.cpp.obj CMakeFiles/vole_core.dir/VoleMachine.cpp.obj
+C:\Qt\Tools\mingw1310_64\bin\ranlib.exe libvole_core.a

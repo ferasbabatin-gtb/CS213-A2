@@ -1,0 +1,25 @@
+// File with team details and who did which part of the code
+SECTION:       S39
+
+ZIP_FILE:      CS213_A2_Part3_S39_20250884_20250800_20250867_20230726.zip
+
+ID1:           20250884
+NAME1:         Mazen Mohamed Abdelrahman Mohamed
+FILES1:        Cpu.h, Cpu.cpp, Menu.h, Menu.cpp, A2-S39-20250884-20250800-20250867-20230726.cpp, gui.h, gui.cpp
+
+
+ID2:           20250800
+NAME2:         Ahmad Hany Ibrahim Akrab
+FILES2:        Menu.h, Menu.cpp, gui.h, gui.cpp
+
+ID3:           20250867
+NAME3:         Omar Mohamed Abdelrahman Ali 
+FILES3:        VoleMachine.h, VoleMachine.cpp, Screen.h, Screen.cpp, gui.h, gui.cpp
+
+ID4:           20230726
+NAME4:         Firas Khalid Saleh Babtain
+FILES4:        Instruction.h, Instruction.cpp, Constants.h, ByteStorage.h, ByteStorage.cpp, gui.h, gui.cpp
+
+GITHUB:        https://github.com/ferasbabatin-gtb/CS213-A2/tree/main
+VIDEO_DESIGN:  https://drive.google.com/drive/folders/1il13RmxAlMDtzUCpi71IZmgS7T7XQf2-
+VIDEO_GUI:     https://drive.google.com/drive/folders/1oisbONNvPDjgAV45CqXojzVTNiFJ8QC4 

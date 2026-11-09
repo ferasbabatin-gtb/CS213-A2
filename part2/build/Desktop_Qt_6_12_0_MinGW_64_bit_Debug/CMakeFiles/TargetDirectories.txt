@@ -1,0 +1,5 @@
+C:/Users/pc/CS213-A2/part2/build/Desktop_Qt_6_12_0_MinGW_64_bit_Debug/CMakeFiles/vole_gui.dir
+C:/Users/pc/CS213-A2/part2/build/Desktop_Qt_6_12_0_MinGW_64_bit_Debug/CMakeFiles/edit_cache.dir
+C:/Users/pc/CS213-A2/part2/build/Desktop_Qt_6_12_0_MinGW_64_bit_Debug/CMakeFiles/rebuild_cache.dir
+C:/Users/pc/CS213-A2/part2/build/Desktop_Qt_6_12_0_MinGW_64_bit_Debug/CMakeFiles/vole_gui_autogen_timestamp_deps.dir
+C:/Users/pc/CS213-A2/part2/build/Desktop_Qt_6_12_0_MinGW_64_bit_Debug/CMakeFiles/vole_gui_autogen.dir

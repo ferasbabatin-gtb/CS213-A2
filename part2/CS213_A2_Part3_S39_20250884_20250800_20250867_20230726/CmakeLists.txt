@@ -1,0 +1,26 @@
+cmake_minimum_required(VERSION 3.16)
+project(VoleGui LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_AUTOMOC ON)   # processes Q_OBJECT in gui.h
+unset(CMAKE_WIN32_EXECUTABLE CACHE)
+set(CMAKE_WIN32_EXECUTABLE OFF)
+
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
+
+# GUI = every .cpp in this folder EXCEPT the console front end (app.cpp, Menu.cpp).
+# The console program is NOT built by CMake; it is built with plain g++ (see README).
+file(GLOB GUI_SRC CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+list(REMOVE_ITEM GUI_SRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/A2-S39-20250884-20250800-20250867-20230726.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Menu.cpp)
+
+add_executable(vole_gui ${GUI_SRC} gui.h)
+target_link_libraries(vole_gui PRIVATE Qt6::Widgets)
+
+# Force a normal console-subsystem executable (entry point = plain main()).
+set_target_properties(vole_gui PROPERTIES WIN32_EXECUTABLE OFF)
+if(MINGW)
+    target_link_options(vole_gui PRIVATE -mconsole)
+endif()
