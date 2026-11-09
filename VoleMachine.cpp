@@ -33,6 +33,7 @@ LoadStatus VoleMachine::readProgramFile(const string& file, vector<Instruction>&
 
     while (getline(input, line)) { 
         lineNumber++;
+        if(line.substr(0,3)=="\xEF\xBB\xBF") line = line.substr(3,line.size());
 
         if (isSkippableLine(line)) { 
             continue;
@@ -168,3 +169,4 @@ void VoleMachine::setScreenFormat(ScreenFormat f) {
 bool VoleMachine::isProgramLoaded() const { 
     return programLoaded;
 }
+
