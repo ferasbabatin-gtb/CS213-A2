@@ -1,11 +1,15 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-const int MEMORY_SIZE    = 256;
-const int REGISTER_COUNT = 16;
-const int SCREEN_ADDRESS = 0xFF;
-const int MAX_STEPS      = 10000;
 
+
+class Constants{
+public:
+    static const int MEMORY_SIZE;
+    static const int REGISTER_COUNT;
+    static const int SCREEN_ADDRESS;
+    static const int MAX_STEPS;
+};
 enum class RunMode { RUN_ALL, STEP_BY_STEP };
 enum class ExecStatus { OK, HALTED, SCREEN_OUTPUT,INVALID_INSTRUCTION };
 enum class ScreenFormat {

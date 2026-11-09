@@ -4,13 +4,13 @@
 using namespace std;
 
 Menu::Menu() : machine(), running(true) {
-    
+
 }
 
 int Menu::readHex(string prompt){
     cout << prompt;
     string input;
-    
+
     while(true){
         getline(cin, input);
     try {
@@ -18,7 +18,7 @@ int Menu::readHex(string prompt){
     } catch (const exception& e) {
         cout << "Invalid hex input: " << input << endl;
         cout << prompt;
-        
+
     }
 }
 }
@@ -47,7 +47,7 @@ ScreenFormat Menu::chooseScreenFormat() {
         case 1: return ScreenFormat::ASCII;
         case 2: return ScreenFormat::HEX;
         case 3: return ScreenFormat::DECIMAL;
-        default: 
+        default:
             cout << "Invalid choice, defaulting to ASCII.\n";
             return ScreenFormat::ASCII;
     }
@@ -56,15 +56,15 @@ RunMode Menu::chooseRunMode() {
     cout << "Choose run mode:\n";
     cout << "1. Run All\n";
     cout << "2. Step\n";
-    
+
     string input;
     getline(cin,input);
-    
+
     if(input == "1") return RunMode::RUN_ALL;
     else if(input == "2") return RunMode::STEP_BY_STEP;
     else{cout << "Invalid choice, defaulting to Run All.\n";
             return RunMode::RUN_ALL;}
-    
+
 }
 void Menu::overwriteFlow() {
     cout << "Memory or cpu register overwrite(1 for memroy,0 for cpu registers)?\n";
@@ -107,7 +107,7 @@ bool Menu::loadProgramFlow() {
         machine.setScreenFormat(chooseScreenFormat());
         printState();
         return true;
-    }  
+    }
 }
 void Menu::showLoadError(LoadStatus result, int badLine) {
     switch (result) {
@@ -129,7 +129,7 @@ void Menu::showLoadError(LoadStatus result, int badLine) {
         default:
             cout << "Unknown error occurred while loading program.\n";
     }
-            
+
     }
 void Menu::showError(StepResult result) {
     switch (result) {
@@ -163,14 +163,14 @@ void Menu::stepFlow() {
             printState();
             string _;
             getline(cin, _);
-           
+
         }
     }
-    
+
 }
 void Menu::runAllFlow() {
-    StepResult result = machine.runAll(MAX_STEPS);
-    if (result != StepResult::STEP_HALTED) {
+    StepResult result = machine.runAll(Constants::MAX_STEPS);
+    if (result != StepResult::STEP_OK) {
         showError(result);
         printState();
     } else {
@@ -194,14 +194,14 @@ void Menu::printMenu() {
 
 void Menu::printReg() {
     cout << "=== CPU Registers ===\n";
-    for (int i = 0; i < REGISTER_COUNT; ++i) {
+    for (int i = 0; i < Constants::REGISTER_COUNT; ++i) {
         cout << "R" << toHex(i,1) << ": " << toHex(machine.getRegister(i), 2) << "\n";
     }
 }
 
 void Menu::printMem() {
     cout << "=== Memory===\n";
-    for (int r = 0; r < MEMORY_SIZE / 16; r++) {
+    for (int r = 0; r < Constants::MEMORY_SIZE / 16; r++) {
         for (int c = 0; c < 16; c++) {
             int addr = r * 16 + c;
             cout << toHex(machine.getMemoryCell(addr), 2) << " ";
@@ -276,4 +276,3 @@ void Menu::run() {
         }
     }
 }
-

@@ -340,27 +340,27 @@ void Gui::applyStyle() {
         QLabel#title { font-size:22px; font-weight:bold; color:#3CFF7E; }
         QLabel#readout { font-size:18px; color:#3CFF7E; }
         QLabel#hdr { color:#1E9C4A; }
-        
+
         /* --- CUSTOM CONSOLE STYLE (Matches the Terminal Image) --- */
-        QTextEdit#console { 
-            font-size: 14px; 
-            color: #E6E6E6; 
-            background: #1E1E1E; 
-            border: 1px solid #333333; 
-            border-radius: 6px; 
-            padding: 6px; 
+        QTextEdit#console {
+            font-size: 14px;
+            color: #E6E6E6;
+            background: #1E1E1E;
+            border: 1px solid #333333;
+            border-radius: 6px;
+            padding: 6px;
         }
-        QTextEdit#console QScrollBar:vertical { 
-            background: #1E1E1E; 
-            width: 12px; 
+        QTextEdit#console QScrollBar:vertical {
+            background: #1E1E1E;
+            width: 12px;
         }
-        QTextEdit#console QScrollBar::handle:vertical { 
-            background: #444444; 
-            border-radius: 5px; 
-            min-height: 24px; 
+        QTextEdit#console QScrollBar::handle:vertical {
+            background: #444444;
+            border-radius: 5px;
+            min-height: 24px;
         }
-        QTextEdit#console QScrollBar::add-line:vertical, QTextEdit#console QScrollBar::sub-line:vertical { 
-            height: 0; 
+        QTextEdit#console QScrollBar::add-line:vertical, QTextEdit#console QScrollBar::sub-line:vertical {
+            height: 0;
         }
         /* ---------------------------------------------------------- */
 
@@ -652,7 +652,7 @@ void Gui::onStep() {
 
 void Gui::onRunAll() {
     if (!ready) return;
-    StepResult r = machine.runAll(MAX_STEPS);
+    StepResult r = machine.runAll(Constants::MAX_STEPS);
     refresh(true);
     showStepResult(r);
 }
@@ -675,4 +675,3 @@ int main(int argc, char** argv) {
     window.show();
     return app.exec();
 }
-
