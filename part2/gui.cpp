@@ -1,4 +1,5 @@
 #include "gui.h"
+#include <QStyle>
 
 // ---------- pixel mascot ----------
 // Left half of the face (8 columns); the right half is mirrored when drawing.
@@ -47,16 +48,16 @@ void PixelMascot::paintEvent(QPaintEvent*) {
 
 // ---------- small helpers ----------
 
-static const int CELL_W = 32;   // minimum memory / register cell size in pixels: change these two to make the window smaller or larger
+static const int CELL_W = 32;
 static const int CELL_H = 19;
-static const int ZERO_CELL = 3;   // a cell holding 00 is drawn dim so real data stands out
+static const int ZERO_CELL = 3;
 
 static QString cellStyle(int state) {
     switch (state) {
-        case 1:  return "color:#031008; background:#3CFF7E; border:1px solid #3CFF7E;";   // changed by last action
-        case 2:  return "color:#FFC247; background:#2A1E05; border:1px solid #FFB000;";   // PC points here (next instruction)
-        case 3:  return "color:#14683A; background:transparent; border:1px solid transparent;";   // zero
-        default: return "color:#3CFF7E; background:transparent; border:1px solid transparent;";   // data
+        case 1:  return "color:#031008; background:#3CFF7E; border:1px solid #3CFF7E;";
+        case 2:  return "color:#FFC247; background:#2A1E05; border:1px solid #FFB000;";
+        case 3:  return "color:#14683A; background:transparent; border:1px solid transparent;";
+        default: return "color:#3CFF7E; background:transparent; border:1px solid transparent;";
     }
 }
 
@@ -90,7 +91,7 @@ Gui::Gui(QWidget* parent)
     : QMainWindow(parent), machine(), ready(false), halted(false), finishedAsked(false), cursorOn(true) {
     prevMem.fill(0);
     prevReg.fill(0);
-    memState.fill(-1);   // -1 forces the first style to be applied
+    memState.fill(-1);
     regState.fill(-1);
 
     buildUi();
@@ -101,7 +102,7 @@ Gui::Gui(QWidget* parent)
     setStatus("Welcome to Vole Machine!", false);
     setStatus("Press LOAD to choose a program...", false);
 
-    // Enter = next step, like "press Enter" in the console version
+    // Enter = next step
     QShortcut* s1 = new QShortcut(QKeySequence(Qt::Key_Return), this);
     connect(s1, &QShortcut::activated, this, &Gui::onStep);
     QShortcut* s2 = new QShortcut(QKeySequence(Qt::Key_Enter), this);
@@ -113,8 +114,8 @@ Gui::Gui(QWidget* parent)
 
     centralWidget()->layout()->activate();
     QSize natural = sizeHint();
-    setMinimumSize(natural);    // never smaller than the content, so nothing is clipped
-    resize(natural);            // starts at that size; the maximize button works and the grid grows with it
+    setMinimumSize(natural);
+    resize(natural);
 }
 
 void Gui::buildUi() {
@@ -137,8 +138,8 @@ void Gui::buildUi() {
     QVBoxLayout* hv = new QVBoxLayout;
     titleLabel = new QLabel("Vole Machine Simulator v1.0");
     titleLabel->setObjectName("title");
-    pcLabel   = new QLabel;
-    irLabel   = new QLabel;
+    pcLabel = new QLabel;
+    irLabel = new QLabel;
     haltLabel = new QLabel;
     pcLabel->setObjectName("readout");
     irLabel->setObjectName("readout");
@@ -150,56 +151,71 @@ void Gui::buildUi() {
     hv->addWidget(haltLabel);
     hl->addLayout(hv, 1);
 
-    // --- Casio-calculator style LCD screen (right of PC / IR / HALT) ---
-    // Read-only text box: wraps long output and scrolls inside its fixed LCD area.
+    // --- LCD screen ---
     screenView = new QTextEdit;
     screenView->setObjectName("screen");
     screenView->setReadOnly(true);
     screenView->setFrameShape(QFrame::NoFrame);
-    screenView->setFocusPolicy(Qt::NoFocus);          // so Enter always means "step"
+    screenView->setFocusPolicy(Qt::NoFocus);
     screenView->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     screenView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     screenView->setMinimumWidth(300);
     screenView->setFixedHeight(76);
+
     QFrame* bezel = new QFrame;
     bezel->setObjectName("lcdBezel");
+
     QVBoxLayout* bz = new QVBoxLayout(bezel);
     bz->setContentsMargins(8, 8, 8, 8);
-    bz->addWidget(screenView);
+    bz->setSpacing(2);
+
+    // Small SCREEN label above the LCD
+    QLabel* screenTitle = new QLabel("SCREEN");
+    screenTitle->setStyleSheet(
+        "color:#1FCC5C; font-size:9px; font-weight:bold;"
+    );
+    screenTitle->setAlignment(Qt::AlignCenter);
+    screenTitle->setFixedHeight(14);
+    screenTitle->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+
+    bz->addWidget(screenTitle);
+    bz->addWidget(screenView, 1);
+
     hl->addWidget(bezel, 1);
 
     addGlow(header, 26);
     root->addWidget(header);
 
-    // --- console messages (what the menu used to print) ---
-    // A read-only text box (not a label): it scrolls inside its own fixed area,
-    // so the amount of text can never change the layout.
+    // --- console messages ---
     consoleView = new QTextEdit;
     consoleView->setObjectName("console");
     consoleView->setReadOnly(true);
     consoleView->setFrameShape(QFrame::NoFrame);
-    consoleView->setFocusPolicy(Qt::NoFocus);          // so Enter always means "step"
+    consoleView->setFocusPolicy(Qt::NoFocus);
     consoleView->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     consoleView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     consoleView->setFixedWidth(280);
     consoleView->setMinimumHeight(110);
     consoleView->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Ignored);
+
     QVBoxLayout* conBox = new QVBoxLayout;
     conBox->addWidget(consoleView);
     QFrame* consolePanel = makePanel("CONSOLE", conBox, false);
 
-    // --- body: registers | memory (memory now takes the space the screen used to have) ---
+    // --- body: registers | memory ---
     QHBoxLayout* body = new QHBoxLayout;
     body->setSpacing(8);
     root->addLayout(body, 1);
 
     QGridLayout* regGrid = new QGridLayout;
     regGrid->setSpacing(4);
+
     for (int i = 0; i < 16; i++) {
         regLabels[i] = new QLabel;
         regLabels[i]->setMinimumSize(72, CELL_H);
         regGrid->addWidget(regLabels[i], i % 8, i / 8);
     }
+
     QVBoxLayout* left = new QVBoxLayout;
     left->setSpacing(8);
     left->addWidget(consolePanel, 1);
@@ -208,6 +224,7 @@ void Gui::buildUi() {
 
     QGridLayout* memGrid = new QGridLayout;
     memGrid->setSpacing(1);
+
     for (int c = 0; c < 16; c++) {
         QLabel* h = new QLabel(hx(c, 1));
         h->setObjectName("hdr");
@@ -215,20 +232,23 @@ void Gui::buildUi() {
         h->setMinimumSize(CELL_W, CELL_H);
         memGrid->addWidget(h, 0, c + 1);
     }
+
     for (int r = 0; r < 16; r++) {
         QLabel* h = new QLabel(hx(r * 16, 2));
         h->setObjectName("hdr");
         h->setMinimumSize(28, CELL_H);
         memGrid->addWidget(h, r + 1, 0);
+
         for (int c = 0; c < 16; c++) {
             QLabel* cell = new QLabel;
             cell->setAlignment(Qt::AlignCenter);
-            cell->setMinimumSize(CELL_W, CELL_H);   // never smaller than this...
-            cell->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);   // ...and grows when the window is maximized
+            cell->setMinimumSize(CELL_W, CELL_H);
+            cell->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
             memCells[r * 16 + c] = cell;
             memGrid->addWidget(cell, r + 1, c + 1);
         }
     }
+
     body->addWidget(makePanel("MEMORY", memGrid, true), 1);
 
     // --- controls ---
@@ -236,27 +256,33 @@ void Gui::buildUi() {
     loadBtn = new QPushButton("LOAD");
     editBtn = new QPushButton("EDIT");
     stepBtn = new QPushButton("STEP");
-    runBtn  = new QPushButton("RUN ALL");
+    runBtn = new QPushButton("RUN ALL");
+    QPushButton* helpBtn = new QPushButton("HELP");
+    QPushButton* exitBtn = new QPushButton("EXIT");
+    exitBtn->setProperty("exitButton", true);
     stepBtn->setToolTip("Run one instruction (Enter)");
 
-    // Calculator-style keypad: a dark plate holding four raised keys
     QFrame* keypad = new QFrame;
     keypad->setObjectName("keypad");
     QHBoxLayout* keys = new QHBoxLayout(keypad);
     keys->setContentsMargins(8, 6, 8, 6);
     keys->setSpacing(10);
-    for (QPushButton* b : {loadBtn, editBtn, stepBtn, runBtn}) {
+
+    for (QPushButton* b : {loadBtn, editBtn, stepBtn, runBtn, helpBtn, exitBtn}) {
         b->setObjectName("key");
-        b->setFocusPolicy(Qt::NoFocus);   // so Enter always means "step"
+        b->setFocusPolicy(Qt::NoFocus);
         b->setCursor(Qt::PointingHandCursor);
         keys->addWidget(b);
     }
+
     controls->addWidget(keypad);
     controls->addStretch(1);
+
     QLabel* fmtLabel = new QLabel("SCREEN FORMAT:");
     formatBox = new QComboBox;
     formatBox->addItems(QStringList() << "ASCII" << "HEX" << "DECIMAL");
     formatBox->setFocusPolicy(Qt::NoFocus);
+
     controls->addWidget(fmtLabel);
     controls->addWidget(formatBox);
     root->addLayout(controls);
@@ -264,7 +290,42 @@ void Gui::buildUi() {
     connect(loadBtn, &QPushButton::clicked, this, &Gui::onLoad);
     connect(editBtn, &QPushButton::clicked, this, &Gui::onEdit);
     connect(stepBtn, &QPushButton::clicked, this, &Gui::onStep);
-    connect(runBtn,  &QPushButton::clicked, this, &Gui::onRunAll);
+    connect(runBtn, &QPushButton::clicked, this, &Gui::onRunAll);
+
+    connect(helpBtn, &QPushButton::clicked, this, [this]() {
+        QMessageBox::information(this, "Vole Machine - Help",
+            "<h2>Welcome to Vole Machine Simulator!</h2>"
+            "<h3>Getting Started</h3>"
+            "<p><b>LOAD:</b> Load a Vole program from a file. "
+            "You will be asked to enter its starting memory address in hexadecimal.</p>"
+            "<h3>Execution Controls</h3>"
+            "<p><b>STEP:</b> Execute one instruction at a time.</p>"
+            "<p><b>RUN ALL:</b> Execute the program automatically.</p>"
+            "<p><b>ENTER:</b> Keyboard shortcut for executing the next instruction.</p>"
+            "<h3>Editing</h3>"
+            "<p><b>EDIT:</b> Manually overwrite a register or memory cell "
+            "using a hexadecimal value.</p>"
+            "<h3>Understanding the Interface</h3>"
+            "<p><b>PC:</b> Program Counter, indicating the address of the next instruction.</p>"
+            "<p><b>IR:</b> Instruction Register, displaying the current instruction.</p>"
+            "<p><b>HALT:</b> Indicates whether the program has stopped.</p>"
+            "<p><b>REGISTERS:</b> Displays the 16 CPU registers (R0-RF).</p>"
+            "<p><b>MEMORY:</b> Displays all 256 memory cells (00-FF).</p>"
+            "<p><b>SCREEN:</b> Displays program output.</p>"
+            "<p><b>CONSOLE:</b> Displays execution messages and errors.</p>"
+            "<h3>Screen Format</h3>"
+            "<ul>"
+            "<li><b>ASCII:</b> Characters.</li>"
+            "<li><b>HEX:</b> Hexadecimal values.</li>"
+            "<li><b>DECIMAL:</b> Decimal values.</li>"
+            "</ul>"
+            "<p>After a program finishes, choose LOAD to load another program "
+            "or EXIT to close the simulator.</p>"
+        );
+    });
+
+    connect(exitBtn, &QPushButton::clicked, this, &QWidget::close);
+
     connect(formatBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
             this, &Gui::onFormatChanged);
 }
@@ -279,7 +340,30 @@ void Gui::applyStyle() {
         QLabel#title { font-size:22px; font-weight:bold; color:#3CFF7E; }
         QLabel#readout { font-size:18px; color:#3CFF7E; }
         QLabel#hdr { color:#1E9C4A; }
-        QTextEdit#console { font-size:15px; color:#3CFF7E; background:#03100A; border:none; padding:2px; }
+        
+        /* --- CUSTOM CONSOLE STYLE (Matches the Terminal Image) --- */
+        QTextEdit#console { 
+            font-size: 14px; 
+            color: #E6E6E6; 
+            background: #1E1E1E; 
+            border: 1px solid #333333; 
+            border-radius: 6px; 
+            padding: 6px; 
+        }
+        QTextEdit#console QScrollBar:vertical { 
+            background: #1E1E1E; 
+            width: 12px; 
+        }
+        QTextEdit#console QScrollBar::handle:vertical { 
+            background: #444444; 
+            border-radius: 5px; 
+            min-height: 24px; 
+        }
+        QTextEdit#console QScrollBar::add-line:vertical, QTextEdit#console QScrollBar::sub-line:vertical { 
+            height: 0; 
+        }
+        /* ---------------------------------------------------------- */
+
         QFrame#lcdBezel { background:#0B100C; border:3px solid #2E352C; border-radius:12px; }
         QTextEdit#screen { font-size:20px; font-weight:bold; color:#1B2316;
             background:qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #D3D9BE, stop:1 #BEC6A4);
@@ -303,6 +387,10 @@ void Gui::applyStyle() {
             border:1px solid #0A0A0A; border-bottom:5px solid #050605; border-radius:8px; }
         QPushButton#key:hover { color:#FFFFFF;
             background:qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #6E716E, stop:0.5 #484B48, stop:1 #323532); }
+        QPushButton#key[choiceHighlight="true"] {
+            color:#031008; background:#3CFF7E;
+            border:2px solid #B6FFD0; border-bottom:5px solid #1FCC5C;
+        }
         QPushButton#key:pressed { background:#262826; border-bottom:2px solid #050605; padding-top:7px; }
         QPushButton#key:disabled { color:#6B6E6B; background:#262826; border-bottom:5px solid #101210; }
         QScrollArea { border:none; background:#020B06; }
@@ -323,7 +411,6 @@ void Gui::setCellState(QLabel* label, int& stored, int state) {
     label->setStyleSheet(cellStyle(state));
 }
 
-// markChanges = true highlights every register/memory cell that differs from the last refresh.
 void Gui::refresh(bool markChanges) {
     int pc = machine.getPC();
 
@@ -336,6 +423,7 @@ void Gui::refresh(bool markChanges) {
     }
 
     bool loaded = machine.isProgramLoaded();
+
     for (int i = 0; i < 256; i++) {
         uint8_t cur = machine.getMemoryCell(i);
         memCells[i]->setText(hx(cur, 2));
@@ -359,17 +447,17 @@ void Gui::updateScreen() {
     bool atBottom = sb->value() >= sb->maximum() - 2;
     int oldValue = sb->value();
     screenView->setPlainText(screenText + (cursorOn ? QString(QChar(0x2588)) : QString(" ")));
-    sb->setValue(atBottom ? sb->maximum() : oldValue);   // follow new output, unless the user scrolled up
+    sb->setValue(atBottom ? sb->maximum() : oldValue);
 }
 
 void Gui::renderConsole() {
     QString html = logLines.join("<br>");
-    html += cursorOn ? "&nbsp;&#9608;" : "&nbsp;&nbsp;";   // same width, so the text never reflows
+    html += cursorOn ? "&nbsp;&#9608;" : "&nbsp;&nbsp;";
     QScrollBar* sb = consoleView->verticalScrollBar();
     bool atBottom = sb->value() >= sb->maximum() - 2;
     int oldValue = sb->value();
     consoleView->setHtml(html);
-    sb->setValue(atBottom ? sb->maximum() : oldValue);   // follow new output, unless the user scrolled up
+    sb->setValue(atBottom ? sb->maximum() : oldValue);
 }
 
 void Gui::blinkCursor() {
@@ -380,7 +468,13 @@ void Gui::blinkCursor() {
 
 void Gui::setStatus(const QString& text, bool isError) {
     QString line = text.toHtmlEscaped();
-    if (isError) line = "<span style='color:#FF6B5E;'>" + line + "</span>";
+    if (isError) {
+        // macOS red for errors (matches the 'Cancel X' in the image)
+        line = "<span style='color:#FF5F56;'>" + line + "</span>";
+    } else {
+        // White/light gray for standard text (matches the prompt text)
+        line = "<span style='color:#E6E6E6;'>" + line + "</span>";
+    }
     logLines.append(line);
     while (logLines.size() > 200) logLines.removeFirst();
     renderConsole();
@@ -388,11 +482,9 @@ void Gui::setStatus(const QString& text, bool isError) {
 
 void Gui::setReady(bool value) {
     ready = value;
-    stepBtn->setEnabled(value);
-    runBtn->setEnabled(value);
 }
 
-// ---------- messages (same wording as the console Menu) ----------
+// ---------- messages ----------
 
 QString Gui::loadErrorText(LoadStatus s, int badLine) const {
     switch (s) {
@@ -402,13 +494,14 @@ QString Gui::loadErrorText(LoadStatus s, int badLine) const {
         case LoadStatus::PROGRAM_TOO_LARGE:    return "Error: Program too large to fit in memory.";
         case LoadStatus::INVALID_INSTRUCTION_IN_FILE:
             return QString("Error: Invalid instruction in file at line %1.").arg(badLine);
-        default:                               return "Unknown error occurred while loading program.";
+        default: return "Unknown error occurred while loading program.";
     }
 }
 
 void Gui::showStepResult(StepResult r) {
     halted = (r == StepResult::STEP_HALTED);
     haltLabel->setText(QString("HALT : ") + (halted ? "Yes" : "No"));
+
     switch (r) {
         case StepResult::STEP_OK:
             setStatus("Step executed. Press Enter for the next step.", false);
@@ -430,14 +523,13 @@ void Gui::showStepResult(StepResult r) {
             break;
     }
 
-    // The run is over (halted or stopped by an error): ask once whether to exit or load another.
     if (r != StepResult::STEP_OK && r != StepResult::STEP_NOT_LOADED && !finishedAsked) {
         finishedAsked = true;
-        QTimer::singleShot(0, this, [this]() { askExitOrLoad(); });   // after the window has repainted
+        QTimer::singleShot(0, this, [this]() { askExitOrLoad(); });
     }
 }
 
-// ---------- actions (the Menu's functions) ----------
+// ---------- actions ----------
 
 void Gui::onLoad() {
     QString file = QFileDialog::getOpenFileName(this, "Load Vole program", QString(),
@@ -449,15 +541,17 @@ void Gui::onLoad() {
                                              "Start address (hex, even, e.g. 00):",
                                              QLineEdit::Normal, "00", &ok);
     if (!ok) return;
+
     int addr = addrText.trimmed().toInt(&ok, 16);
     if (!ok) {
-        setReady(false);                       // a failed load leaves nothing runnable
+        setReady(false);
         setStatus("Error: invalid hex address.", true);
         return;
     }
 
     int badLine = 0;
     LoadStatus st = machine.loadProgram(file.toStdString(), addr, badLine);
+
     if (st != LoadStatus::LOAD_OK) {
         setReady(false);
         setStatus(loadErrorText(st, badLine), true);
@@ -466,6 +560,22 @@ void Gui::onLoad() {
 
     halted = false;
     finishedAsked = false;
+
+    loadBtn->setProperty("choiceHighlight", false);
+    loadBtn->style()->unpolish(loadBtn);
+    loadBtn->style()->polish(loadBtn);
+    loadBtn->update();
+
+    for (QPushButton* b : findChildren<QPushButton*>()) {
+        if (b->property("exitButton").toBool()) {
+            b->setProperty("choiceHighlight", false);
+            b->style()->unpolish(b);
+            b->style()->polish(b);
+            b->update();
+            break;
+        }
+    }
+
     setReady(true);
     refresh(false);
     setStatus("Program loaded at " + hx(addr, 2) + ".", false);
@@ -477,43 +587,59 @@ void Gui::onEdit() {
     QString kind = QInputDialog::getItem(this, "Edit", "Overwrite:",
                                          QStringList() << "Register" << "Memory cell", 0, false, &ok);
     if (!ok) return;
+
     bool isReg = (kind == "Register");
 
     QString idxText = QInputDialog::getText(this, "Edit",
         isReg ? "Register index (hex 0-F):" : "Memory address (hex 00-FF):",
         QLineEdit::Normal, "", &ok);
     if (!ok) return;
+
     int idx = idxText.trimmed().toInt(&ok, 16);
-    if (!ok || idx < 0) { setStatus("Error: invalid hex index.", true); return; }
+    if (!ok || idx < 0) {
+        setStatus("Error: invalid hex index.", true);
+        return;
+    }
 
     QString valText = QInputDialog::getText(this, "Edit", "New value (hex 00-FF):",
                                             QLineEdit::Normal, "", &ok);
     if (!ok) return;
+
     int val = valText.trimmed().toInt(&ok, 16);
-    if (!ok || val < 0) { setStatus("Error: invalid hex value.", true); return; }
+    if (!ok || val < 0) {
+        setStatus("Error: invalid hex value.", true);
+        return;
+    }
 
     bool done = isReg ? machine.setRegister(idx, val) : machine.setMemoryCell(idx, val);
+
     if (!done) {
         setStatus(isReg ? "Error: Register index out of range." : "Error: Address out of range.", true);
         return;
     }
+
     refresh(true);
     setStatus(QString(isReg ? "Register R%1" : "Memory at %1").arg(hx(idx, isReg ? 1 : 2))
               + " overwritten with " + hx(val & 0xFF, 2) + ".", false);
 }
 
 void Gui::askExitOrLoad() {
-    QMessageBox box(this);
-    box.setWindowTitle("Program finished");
-    box.setText("Do you want to exit or load another program?");
-    QPushButton* loadAnother = box.addButton("Load another", QMessageBox::AcceptRole);
-    QPushButton* exitButton  = box.addButton("Exit", QMessageBox::DestructiveRole);
-    box.setDefaultButton(loadAnother);
-    box.exec();
-    if (box.clickedButton() == exitButton) {
-        close();
-    } else if (box.clickedButton() == loadAnother) {
-        onLoad();
+    setStatus("Program finished. Choose LOAD to load another program or EXIT to close the simulator.", false);
+
+    // Highlight LOAD and EXIT without disabling any controls.
+    loadBtn->setProperty("choiceHighlight", true);
+    loadBtn->style()->unpolish(loadBtn);
+    loadBtn->style()->polish(loadBtn);
+    loadBtn->update();
+
+    for (QPushButton* b : findChildren<QPushButton*>()) {
+        if (b->property("exitButton").toBool()) {
+            b->setProperty("choiceHighlight", true);
+            b->style()->unpolish(b);
+            b->style()->polish(b);
+            b->update();
+            break;
+        }
     }
 }
 
@@ -535,12 +661,13 @@ void Gui::onFormatChanged(int index) {
     ScreenFormat f = index == 1 ? ScreenFormat::HEX
                    : index == 2 ? ScreenFormat::DECIMAL
                                 : ScreenFormat::ASCII;
+
     machine.setScreenFormat(f);
     screenText = QString::fromStdString(machine.getScreenString());
     updateScreen();
 }
 
-// ---------- entry point for the GUI program ----------
+// ---------- entry point ----------
 
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
@@ -548,3 +675,4 @@ int main(int argc, char** argv) {
     window.show();
     return app.exec();
 }
+
