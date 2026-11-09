@@ -3,15 +3,14 @@ skinparam classAttributeIconSize 0
 skinparam shadowing false
 hide empty members
 
-' ============================ Constants ============================
+'' ============================ Constants ============================
 
 class Constants <<header>> {
-  + MEMORY_SIZE = 256
-  + REGISTER_COUNT = 16
-  + SCREEN_ADDRESS = 0xFF
-  + MAX_STEPS = 10000
+   + MEMORY_SIZE : int = 256
+   + REGISTER_COUNT :  int = 16
+   + SCREEN_ADDRESS :  int = 0xFF
+   + MAX_STEPS :  int = 10000
 }
-
 ' ============================ Enums ============================
 
 enum ExecStatus {
