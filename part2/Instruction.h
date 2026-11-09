@@ -11,7 +11,7 @@ private:
 public:
     Instruction(int value = 0);
 
-    static bool parse(const std::string& line, Instruction& out);
+    static bool parse(std::string& line, Instruction& out);
 
     int opcode() const;
     int r() const;

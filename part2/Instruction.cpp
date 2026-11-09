@@ -33,7 +33,8 @@ string Instruction::toString() const {
         text[i] = digits[(value >> (12 - 4 * i)) & 0xF];
     return text;
 }
-bool Instruction::parse(const std::string& line, Instruction& out){
+
+bool Instruction::parse(std::string& line, Instruction& out){
     for(int i = 0;i<4;i++){
         if((line[i]<='F' && line[i]>='A') || (line[i]>='0' && line[i]<='9' ||( line[i]>='a' && line[i]<='f'))){
             continue;
@@ -42,7 +43,7 @@ bool Instruction::parse(const std::string& line, Instruction& out){
             return false;
         }
 
-        
+
     }
 
 
@@ -50,6 +51,6 @@ bool Instruction::parse(const std::string& line, Instruction& out){
     out = Instruction(val);
     return out.isValid();
 
-   
-    
+
+
 }
